@@ -77,38 +77,6 @@ let allperms l =
       Not_found -> acc
   in aux_prev [l] @ aux_next [next l];;
 
-(*
-
-[2, 1, 3, 4]
-
-
-h>n && n h<r
-
-n=2 r=l [] [1;3;4]
-n=2 r=1 [1] [3;4]
-n=2 r=3 [1,2,4] [;]
-
-n=2 r=l [] [1;3;4]
-n=2 r=1 [1] [3;4]
-n=2 r=3 [1,2,4] [;]
-
-----------------------------------------
-
- [2,1,3,4]
-
- foo1
- 2 [] [1,3,4]
- 2 [1] [3,4]
- 2 [1] [3,4]
-
- foo2 3 [1;2] [4]
- 3 [1;2;4]
-
-
-PROBAR A PONER R EN LA PRIMERA POSICION
- *)
-
-
 let combi l = 
     let rec foo1 n acc1 l1 = 
         let rec foo2 r acc2 l2 = match l2 with
@@ -120,16 +88,3 @@ let combi l =
         h::t -> if h > n then foo2 h (n::acc1) t 
             else foo1 n (h::acc1) t
     in foo1 (List.hd l) [] (List.tl l)
-        
-
-
-
-
-let rec combi n l =
-    let rec aux acc l r = match l with
-        [] -> (acc, r) |
-        h::t -> if h > n && h < r then aux (r::acc) t h 
-        else aux (h::acc) t r
-    in match l with
-    h::t-> if h>n then (aux [] t h)
-    else let c = (combi n l) in ((h::fst c), snd c );;
