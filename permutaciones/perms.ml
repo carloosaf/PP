@@ -6,63 +6,62 @@ let rec ascending = function
 	h1::h2::t -> h1 <= h2 && ascending (h2::t) |
 	_ -> true;;
 
-let rec divide = function
-  h1::h2::t -> let t1, t2 = divide t 
-                 in h1::t1, h2::t2 |
+let rec qsort ord = function 
+    [] -> []
+    | h::t -> let after, before = List.partition (ord h) t 
+              in qsort ord before @ h :: qsort ord after;;
 
-  l -> l, [];;
-let rec merge f l1 l2 = match l1, l2 with 
-  [], l | l, [] -> l |
-  h1::t1, h2::t2 -> if (f h1 h2) then h1::merge f t1 l2
-                    else h2::l1;;
 
-let rec m_sort f  = function (*No tail recursive*)
-  [] -> [] |
-  h::[] -> h::[] |
-  l -> let l1, l2 = divide l
-  in merge f (m_sort f l1) (m_sort f l2);;
+let next_number l =  
+  (* Dada una lista l con cabeza h, devuelve una lista l' con cabeza h' igual al siguiente
+     elemento a h en orden topologico de los presentes en l. El resto de elementos se situan
+     en la cola sin ningun orden concreto *)   
+   let rec aux1 n acc1 l1 = (*Buscar el primer número mayor que h*)
+        let rec aux2 r acc2 l2 = match l2 with (*Busca el siguiente en orden topologico*)
+            [] -> r::acc2 |
+            h::t -> if h > n  && h < r then aux2 h (r::acc2) t
+            else aux2 r (h::acc2) t
+        in match l1 with
+        [] -> raise (Invalid_argument "next_number") |
+        h::t -> if h > n then aux2 h (n::acc1) t 
+            else aux1 n (h::acc1) t
+    in aux1 (List.hd l) [] (List.tl l)
 
-let rec max_in_list l = List.fold_left max (List.hd l) l;;
-let rec min_in_list l = List.fold_left min (List.hd l) l;;
+let prev_number l = 
+  (* Equivalente a next_number pero situa como h' al elemente previo en orden topologico*)
+    let rec aux1 n acc1 l1 = 
+        let rec aux2 r acc2 l2 = match l2 with
+            [] -> r::acc2 |
+            h::t -> if h < n  && h > r then aux2 h (r::acc2) t
+            else aux2 r (h::acc2) t
+        in match l1 with
+        [] -> raise (Invalid_argument "prev_number") |
+        h::t -> if h < n then aux2 h (n::acc1) t 
+            else aux1 n (h::acc1) t
+    in aux1 (List.hd l) [] (List.tl l)
 
-let next_greater n l =
-  let rec aux l r = match l with 
-    [] -> r |
-    h::t -> if h > n && h < r then aux t h
-    else aux t r 
-  in aux l (max_in_list l);;
+let reorder_next l =  let c = next_number l in 
+  (*Devuelve la siguiente permutacion de una lista l con una cola sin más permutaciones siguientes*)
+    (List.hd c):: qsort (<=) (List.tl c)
+    
+let reorder_prev l =  let c = prev_number l in 
+  (*Devuelve la anterior permutacion de una lista l con una cola sin más permutaciones previas*)
+    (List.hd c):: qsort (>=) (List.tl c)
 
-let next_lesser n l =
-  let rec aux l r = match l with 
-    [] -> r |
-    h::t -> if h < n && h > r then aux t h
-    else aux t r 
-  in aux l (min_in_list l);;
-
-let rec delete_n n l = (*No tail recursive*)
-  let rec aux acc l = match l with 
-    [] -> acc |
-    h::t -> if h != n then aux (h::acc) t
-    else acc@t
-  in aux [] l;;
-
-let rec reorder_next l = let next =  next_greater (List.hd l) l  in 
-next::(m_sort (<=) (delete_n next l));;
-
-let rec reorder_prev l = let next =  next_lesser (List.hd l) l  in 
-next::(m_sort (>=) (delete_n next l));;
 
 let rec next l =
-  if descending l then raise Not_found
+  if descending l then raise Not_found (*Si l esta en orden decentente no tiene más permutaciones siguientes*)
   else match l with
+    h::[] -> [h] |
     h1::h2::[] -> h2::[h1] |
     h1::t -> (try h1::next(t) with 
       Not_found -> reorder_next l)|
     [] -> [];;
 
 let rec prev l = 
-  if ascending l then raise Not_found
+  if ascending l then raise Not_found  (*Si l esta en orden ascendente no tiene más permutaciones previas*)
   else match l with
+    h::[] -> [h] |
     h1::h2::[] -> h2::[h1] |
     h1::t -> (try h1::prev(t) with 
       Not_found -> reorder_prev l)|
@@ -75,16 +74,6 @@ let allperms l =
   let rec aux_prev acc = 
     try  aux_prev (prev (List.hd acc)::acc) with 
       Not_found -> acc
-  in aux_prev [l] @ aux_next [next l];;
-
-let combi l = 
-    let rec foo1 n acc1 l1 = 
-        let rec foo2 r acc2 l2 = match l2 with
-            [] -> r::acc2 |
-            h::t -> if h > n  && h < r then foo2 h (r::acc2) t
-            else foo2 r (h::acc2) t
-        in match l1 with
-        [] -> raise Not_found |
-        h::t -> if h > n then foo2 h (n::acc1) t 
-            else foo1 n (h::acc1) t
-    in foo1 (List.hd l) [] (List.tl l)
+  in aux_prev [l] @ try let next_element = next l in aux_next [next_element] with 
+(* En caso de que l sea el ultimo elemento, concatenar el resultado de aux_prev con la lista vacia**)
+                    Not_found -> [];; 
