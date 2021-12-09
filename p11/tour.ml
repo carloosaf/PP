@@ -13,4 +13,3 @@ let tour m n (xi,yi) (xf,yf) =
                       Not_found -> aux ((xs, ys)::path) (xs-2, ys+1)
                 else raise (Not_found)
     in aux [] (xi, yi);;
-
