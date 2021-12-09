@@ -211,3 +211,15 @@ let conj b1 b2 = match b1,b2 with
     _, F -> F;;
 
 
+
+(* Imperativo *)
+
+
+(*let output_char sal s =*)
+
+let output_string sal s =
+    for i=0 to String.length s - 1 do 
+        output_char sal s.[i]
+    done;;
+
+let print_string s = output_string stdout s;;

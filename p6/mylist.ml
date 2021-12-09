@@ -26,13 +26,6 @@ let rec append l1 l2 = match l1 with
 let rec rev_append l1 l2 = match l1 with 
 	[]->l2 |
 	h::t -> rev_append t (h::l2);;
-(*-------------------------------------------------------------------*)
-
- (* FIND PERO DEVUELVE EL INDICE
- let rec find f l= match l with  
-  h::t -> ((function true -> 0|
-                    false -> 1 + find f t )(f h)) |
-  [] -> 1;;*)
   
 let rec find f l= match l with  
   h::t -> ((function true -> h|
@@ -56,6 +49,8 @@ let rec filter f l = match l with
                      false -> filter f t)(f h)) |
   [] -> [];;
 
+let find_all f l = filter f l;;
+
 let rec partition f l = match l with
   h::t -> (function true -> (h::fst (partition f t), snd (partition f t)) |
                     false ->(fst (partition f t), h::snd (partition f t)))(f h) |
@@ -65,30 +60,30 @@ let rec split = function
   h::t -> (fst h::(fst (split t)), snd h::(snd (split t))) |
   [] -> ([],[]);;
 
+let rec combine l1 l2 = match l1, l2 with
+    ([], []) -> [] |
+    h1::t1, h2::t2 -> (h1, h2):: combine t1 t2 |
+    _,_ -> raise (invalid_arg "combine");;
+
 let init n f =
   let rec init_rec i n f =
     if i >= n then [] 
     else f i::init_rec (i+1) n f in
   init_rec 0 n f;; 
 
-(*[1; 2; 3]
-
-aux 1::[] [2;3]
-aux 2::[1] [3]
-aux 3::[2 ; 1] [] *)        
 let rev l = 
   let rec aux v = function
     [] -> v |
     h::t -> aux (h::v) t
   in aux [] l;;
 
-let rec concat r = function
-  h::t -> let rec aux lr l1 = match lr with
-    [] -> l1 |
-    h::[] -> h::l1 |
-    h::t -> h::(aux t l1) 
-  in concat (aux r h) t |
-  [] -> r;;
+let concat l=
+  let rec aux acc l = match l with 
+    h::t -> aux (rev_append h acc) t |
+    [] -> rev acc 
+  in aux [] l;;
+
+let rec flatten l = concat l;;
 
 let rec map f l = match l with 
 h::[] -> [f h] |

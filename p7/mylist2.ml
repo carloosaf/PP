@@ -7,7 +7,7 @@ let tl = function
   [] -> raise (Failure "tl") |
   _::t -> t;;
 
-let lelgth l = 
+let length l = 
   let rec suma_length i = function
   	[] -> i |
   	_::t -> suma_length (i+1) t 
@@ -30,14 +30,6 @@ let rec append l1 l2 = match l1 with
  [] -> l2|
  h::t -> h::(append t l2);;
 
-(*-------------------------------------------------------------------*)
-
- (* FIND PERO DEVUELVE EL INDICE
- let rec find f l= match l with  
-  h::t -> ((function true -> 0|
-                    false -> 1 + find f t )(f h)) |
-  [] -> 1;;*)
-  
 let rec find f l= match l with  
   h::t -> ((function true -> h|
                   false -> find f t )(f h)) |
@@ -67,12 +59,17 @@ let filter f l =
     [] -> rev acc
   in aux [] f l;;
 
+let find_all f l = 
+  let rec aux acc f l = match l with 
+    h::t -> if (f h) then aux (h::acc) f t  else aux acc f t |
+    [] -> rev acc
+  in aux [] f l;;
+
 let partition f l =
   let rec aux tacc facc f l = match l with 
     h::t -> if (f h) then aux (h::tacc) facc f t  else aux tacc (h::facc) f t |
     [] -> (rev tacc, rev facc)
   in aux [] [] f l;;
-
 
 let split l=
   let rec aux acc1 acc2 l = match l with 
@@ -80,7 +77,10 @@ let split l=
     [] -> (rev acc1,rev acc2)
   in aux [] [] l;;
 
-
+let rec combine l1 l2 = match l1, l2 with
+    ([], []) -> [] |
+    h1::t1, h2::t2 -> (h1, h2):: combine t1 t2 |
+    _,_ -> raise (invalid_arg "combine");;
 
 let init n f =
   if n < 0 then raise (Invalid_argument "init") 
@@ -100,19 +100,13 @@ let rec rev_append l1 l2 = match l1 with
 	[]->l2 |
 	h::t -> rev_append t (h::l2);;
 
-let rec concat r = function
-  h::t -> let rec aux lr l1 = match lr with
-    [] -> l1 |
-    h::[] -> h::l1 |
-    h::t -> h::(aux t l1) 
-  in concat (aux r h) t |
-  [] -> r;;
-
 let concat l=
   let rec aux acc l = match l with 
     h::t -> aux (rev_append h acc) t |
     [] -> rev acc 
   in aux [] l;;
+
+let flatten l= concat l;;
 
 let rec map f l = match l with 
   [] -> [] |
@@ -125,12 +119,12 @@ let rec rev_map f l =
   in aux [] l;;
 
 let rec map2 f l1 l2 = match l1, l2 with 
-    ([], h::_) | (h::_, []) -> raise (Invalid_argument "map2") |
     ([], []) -> [] | 
-    (h1::t1, h2::t2) -> (f h1 h2)::map2 f t1 t2;;
+    (h1::t1, h2::t2) -> (f h1 h2)::map2 f t1 t2 |
+    _ , _ -> raise (Invalid_argument "map2");; 
 
 let rec fold_left f n l = match l with
-  [] -> [] |
+  [] -> n |
   h::t -> fold_left f (f n h) t;;
 
 let rec fold_right op l e = match l with
