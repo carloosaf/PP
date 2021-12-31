@@ -1,4 +1,4 @@
-	let rec div x y = 
+let rec div x y = 
 	if x < y then 0, x
 	else 
 	let q, r = div (x-y) y in
@@ -207,10 +207,8 @@ let div m n = match m,n with
 type booleano = V | F;;
 
 let conj b1 b2 = match b1,b2 with
-    V, V -> V |
-    _, F -> F;;
-
-
+    V, V -> V 
+  | _, F | F, _ -> F;;
 
 (* Imperativo *)
 
@@ -223,3 +221,31 @@ let output_string sal s =
     done;;
 
 let print_string s = output_string stdout s;;
+
+let read_line () = input_line stdin;;
+
+let rec output_string_list s = function
+    [] -> ()
+  | h::t -> output_string s (h ^ "\n");
+            output_string_list s t;;
+
+let rec input_string_list f = 
+    try
+        let s = input_line f in 
+        s :: input_string_list f
+    with End_of_file -> [];;
+
+(*15/12*)
+
+(*Structs*)
+
+type persona = {nombre: string; edad: int};;
+
+let p1 = {nombre = "Pepe"; edad = 55};;
+
+p1.nombre
+
+let nombre p = p.nombre;;
+
+let envejecer p =  {nombre = p.nombre; edad = p.edad + 1}
+

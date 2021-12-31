@@ -42,7 +42,6 @@ let rec prop_of_log_exp = function
   | Cond (e1, e2) -> BiOp (If, prop_of_log_exp e1, prop_of_log_exp e2)
   | BiCond (e1, e2) -> BiOp (Iff, prop_of_log_exp e1, prop_of_log_exp e2);;
 
-
 let rec log_exp_of_prop = function
     C c -> Const c
   | V v -> Var v
