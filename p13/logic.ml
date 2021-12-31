@@ -33,6 +33,7 @@ type prop =
 
 (* FUNCTIONS *)
 
+(*A*)
 let rec prop_of_log_exp = function
     Const c -> C c
   | Var v -> V v
@@ -51,6 +52,7 @@ let rec log_exp_of_prop = function
   | BiOp (If, e1, e2) -> Cond ((log_exp_of_prop e1), (log_exp_of_prop e2))
   | BiOp (Iff, e1, e2) -> BiCond ((log_exp_of_prop e1), (log_exp_of_prop e2));;
 
+(*B*)
 
 let opval = function
     Not -> (not);; 
@@ -58,7 +60,7 @@ let opval = function
 let biopval = function
     Or -> (||)
   | And -> (&&)
-  | If -> (fun x y -> not x && x)
+  | If -> (fun x y -> not x || y)
   | Iff -> (=);;
 
 let rec peval ctx = function
@@ -66,3 +68,25 @@ let rec peval ctx = function
   | V v -> List.assoc v ctx
   | Op (p, e) -> (opval p) (peval ctx e) 
   | BiOp (p, e1, e2) -> (biopval p) (peval ctx e1) (peval ctx e2);;
+
+(*C*)
+let rec combinations = function
+    0 -> [[]]
+  | n -> let comb_f = List.map (fun l -> false::l) (combinations (n-1)) in
+         let comb_t = List.map (fun l -> true::l) (combinations (n-1)) in
+          comb_t @ comb_f
+
+let get_vars p = 
+    let rec aux acc = function
+        V v-> if not (List.mem v acc) then v::acc else []
+      | Op (_, p) -> aux acc p
+      | BiOp (_, p1, p2) -> List.rev_append (aux acc p1) (aux acc p2)
+      | C c -> []
+    in aux [] p;;
+
+let is_tau p = 
+    let vars = get_vars p in 
+    let all_ctx = List.map (List.combine vars) (combinations (List.length vars)) in 
+    let flipped = Fun.flip peval in
+    List.for_all (fun x -> x = true) (List.map  (flipped p) all_ctx);;
+    
