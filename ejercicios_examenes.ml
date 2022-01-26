@@ -49,7 +49,26 @@ let apariciones x l =
       | h::t ->  aux t (if h=x then n+1 else n)
     in aux l 0;;
 
-let split f l =
-    let rec aux acc1, acc2 = function
-        [] -> acc1,acc2
-      | h::t -> if fh then 
+(*ej3 ene 2016*)
+
+let rec last_element = function 
+    [] -> raise (Invalid_argument "last_element")
+  | h::[] ->h
+  | h::t -> last_element t;;
+
+(*ej4 ene 2016*)
+
+let output_multiples x a b = 
+    for i = a to b do 
+        if (i mod x) = 0 then 
+            Format.print_int i
+    done;;
+
+(*ej5 ene 2016*)
+
+type 'a clist = Empty | Single of 'a | App of 'a clist * 'a clist
+
+let rec is_empty = function
+    Empty  -> true 
+  | Single _ -> false 
+  | App (a, b) -> (is_empty a) && (is_empty b);;
