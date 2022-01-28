@@ -72,3 +72,27 @@ let rec is_empty = function
     Empty  -> true 
   | Single _ -> false 
   | App (a, b) -> (is_empty a) && (is_empty b);;
+
+type 'a arb = R of 'a
+| U of 'a * 'a arb 
+|B of 'a * 'a arb * 'a arb
+
+
+let anchura al =
+    let rec aux acc queue = 
+        if List.length queue = 0 then acc
+        else 
+            let x = List.hd queue in
+            match x with 
+                 R(x) -> aux (x::acc) queue
+               | U(x, a) -> aux (x::acc) (a::queue)
+               | B(x, a1, a2) -> aux (x::acc) (a1::a2::queue)
+    in aux [] [al];;
+
+let anchura arbol = 
+    let rec aux = function 
+        [] -> []
+               | R(x)::t -> x::aux t
+               | U(x, i)::t -> x::aux (t @ [i])
+               | B(x, i, d)::t -> x::aux (t@[i;d])
+    in aux [arbol];;
